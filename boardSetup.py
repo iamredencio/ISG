@@ -46,6 +46,7 @@ def main():
 			(row >= 17 and col > 4) | (row > 18 and col > 3) | (row > 20 and col > 1) ):
       			hexagon = hexagon_generator(row, col)
       			draw.polygon(list(hexagon), outline='red', fill='white')
+  movePiece(draw, 0, 5)
   image.show()
 
 def movePiece(canvas, row, col):
