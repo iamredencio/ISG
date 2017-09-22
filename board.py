@@ -1,5 +1,5 @@
 import numpy as np
-import random
+import random as rnd
 
 
 
@@ -29,18 +29,24 @@ def validMove(move):
     return True
 
 
-def makeMove(move):
+def makeMove(move, board):
 
-    zobristKey = 0
+    zobristKey = board
     if validMove(move):
-        zobristKey ^= 1
+        zobristKey ^= board
+    else:
+        return zobristKey
 
-    pieceList[(move[1][0], move[1][1])] = pieceList[(move[0][0], move[0][1])]
+    pieceList[(move[1][0], move[1][1])] = ['x', 'x', rnd.getrandbits(64)]
+    pieceList[(move[1][0], move[1][1])][0] = pieceList[(move[0][0], move[0][1])][0]
+    pieceList[(move[1][0], move[1][1])][1] = pieceList[(move[0][0], move[0][1])][1]
+
+    # Update Zobrist key board
+    zobristKey ^= pieceList[(move[0][0], move[0][1])][2]
+    zobristKey ^= pieceList[(move[1][0], move[1][1])][2]
     del pieceList[(move[0][0], move[0][1])]
-    #zobristKey ^= Zobrist.PIECES[2][0][move[0][1]];
-    #zobristKey ^= Zobrist.PIECES[2][0][move[1][1]];
 
-    return validMove(move)
+    return zobristKey
 
 # initialize board
 def boardInit(board):
@@ -183,5 +189,5 @@ def drawBoard():
 
     return strs
 
-print drawBoard(), makeMove([['F', 1] , ['F', 6]]), '\nInitial zobrist board: ', boardInit(board)
+print drawBoard(), '\nInitial zobrist board: ', makeMove([['F', 1] , ['F', 6]], boardInit(board))
 print drawBoard(), '\nNew zobrist board: ', boardInit(board) #, '\n', len(board), '\n', pieceList
