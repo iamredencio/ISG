@@ -17,27 +17,16 @@ def validMove(move):
     difHorz = ord(move[0][0]) - ord(move[1][0]) #horz distance - left,  + right
     difVert = move[0][1] - move[1][1] #vertical distance - up,  + down
 
+    fromMoveValue = move[0][1] * 11 - (ord(move[0][0]) - 64)
+    toMoveValue = move[1][1] * 11 - (ord(move[1][0]) - 64)
+    if toMoveValue < 0 or toMoveValue > 121 or board[toMoveValue] == -1:
+        return False
+    if fromMoveValue < 0 or fromMoveValue > 121 or board[fromMoveValue] == -1:
+        return False
 
-# ((70 - 64 - 6) * 11) + 70 - 64 - 5 * 4 + ((70 - 64 - 6) * 4) = 4
-    moveValue = (ord(move[1][0]) - 64 - 6) * 11 + (ord(move[1][0]) - 64 - 5) * move[1][1] + (ord(move[1][0]) - 64 - 6) * move[1][1]
-
-    print move[1][0], move[1][1], moveValue, board[moveValue], board[moveValue] != -1
-
-    # Check if on the board after a move and moving in the vertical direction
-    # else check if move still on board
-    if difHorz == 0:
-        if difVert > 0 and move[0][1] + 27 <= 120: return True
-        elif difVert < 0 and move[0][1] - 27 >= 0: return True
-    elif move[1][0] in ['A', 'B', 'K', 'J'] and move[1][1] < 3 : return False
-    elif move[1][0] in ['C', 'D', 'H', 'I'] and move[1][1] < 2: return False
-    elif move[1][0] in ['B', 'C', 'I', 'J'] and move[1][1] > 9 : return False
-    elif move[1][0] in ['A', 'K'] and move[1][1] > 8: return False
-    elif move[1][0] in ['D', 'E', 'G', 'H'] and move[1][1] > 8: return False
 
     # Default is that everything fits within a 11 x 11 grid
-    return (ord(move[0][0]) > 63 and ord(move[0][0]) < 76) and \
-    (ord(move[1][0]) > 63 and ord(move[1][0]) < 76) and  \
-    (move[0][1] > 0 and move[0][1] < 12) and (move[1][1] > 0 and move[1][1] < 12)
+    return True
 
 
 def makeMove(move):
@@ -46,6 +35,8 @@ def makeMove(move):
     if validMove(move):
         zobristKey ^= 1
 
+    pieceList[(move[1][0], move[1][1])] = pieceList[(move[0][0], move[0][1])]
+    del pieceList[(move[0][0], move[0][1])]
     #zobristKey ^= Zobrist.PIECES[2][0][move[0][1]];
     #zobristKey ^= Zobrist.PIECES[2][0][move[1][1]];
 
@@ -54,10 +45,22 @@ def makeMove(move):
 # initialize board
 def boardInit(board):
     zobristKey = 0
+    distList = []
+    for key, value in pieceList.iteritems():
+        distList.append(key)
+
     for pos in board:
+        r, c = getRowCol(pos)
         if board[pos] != -1:
             zobristKey ^= board[pos]
+            try:
+
+                distList.index((c,r)) # Check if there is a piece at this location
+                zobristKey ^= pieceList[(c, r)][2]
+            except ValueError:
+                ''
     return zobristKey
+
 '''
   int piece = board.boardArray[index];
   if(piece > 0) // White piece
@@ -71,7 +74,7 @@ def boardInit(board):
 def getRowCol(pos):
     try:
         row = [1, 12, 23, 34, 45, 56, 67, 78, 89, 100, 111].index(pos) + 1
-        col = 'A' #65
+        col = 'A' #ascii 65
         return [row, col]
     except ValueError:
         pass
@@ -180,5 +183,5 @@ def drawBoard():
 
     return strs
 
-print makeMove([['A', 8] , ['F', 11]]), '\nInitial board: ', boardInit(board)
-print drawBoard(), '\n', len(board), '\n', pieceList
+print drawBoard(), makeMove([['F', 1] , ['F', 6]]), '\nInitial zobrist board: ', boardInit(board)
+print drawBoard(), '\nNew zobrist board: ', boardInit(board) #, '\n', len(board), '\n', pieceList
