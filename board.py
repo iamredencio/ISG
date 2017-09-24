@@ -1,4 +1,4 @@
-import numpy as np
+#import numpy as np
 import random as rnd, math
 
 zobristKey = 1L; # Zobrist key of board position
@@ -34,6 +34,7 @@ def HashInput(zobristKey, depth, flag, evaluation, oldEntry, move):
 #== if(hashentry.depth >= ply)
 #==  // Use the values attached
 #=====================================================
+'''
 class Node:
   def init__(self, data, par = None):
     self.data = list([data])
@@ -100,7 +101,7 @@ class Tree:
 
     def find(self, item):
       return self.root._find(item) #in node class
-
+'''
 #=====================================================
 pieceList = {('F',1): [6, 'N', 14673753767654285510], ('F', 2):[17, 'M', 16429230233791572847], ('F', 3): [28, 'M', 5460759063079358787], ('E', 1): [5, 'P', 16318954180246517971], \
 ('E', 2): [15, 'P', 11953987020898008829], ('D', 2): [16, 'M', 13266023888163619881], ('G', 1): [7, 'P', 1156566135542422088], ('G', 2): [18, 'P', 15992721674334807719], ('H', 2): [18, 'M', 12746413846889731457], \
@@ -121,7 +122,15 @@ def validMove(move):
         return False
     if fromMoveValue < 0 or fromMoveValue > 121 or board[fromMoveValue] == -1:
         return False
+    s = 1
+    d = []
 
+    while s < 121:
+        s += 12
+        d += [s]
+    print d
+    for i in d:
+	print getRowCol(i)
     # Default assumption is that everything fits within a 11 x 11 grid
     return True
 
