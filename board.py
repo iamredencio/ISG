@@ -7,7 +7,24 @@ flag = 0; # exact, alhpa, beta, determines cut off
 evaluation = 0; # States if the side to move is ahead
 oldEntry = 1; # Entry in table that has been obtained on lower ply
 move = []; # The move that was best on a certain depth
+'''====
+>>> my_list1 = [30,34,56]
+>>> my_list2 = [29,500,43]
 
+>>> import numpy as np
+>>> A_1 = np.array(my_list1)
+>>> A_2 = np.array(my_list2)
+
+>>> A_1 >= 30
+array([ True,  True,  True], dtype=bool)
+>>> A_2 >= 30
+array([False,  True,  True], dtype=bool)
+
+>>> ((A_1 >= 30).sum() == A_1.size).astype(np.int)
+1
+>>> ((A_2 >= 30).sum() == A_2.size).astype(np.int)
+0
+==='''
 class HashInput:
   def __init__(self, zobristKey, depth, flag, evaluation, oldEntry, move):
     self.zobrist = zobristKey;
@@ -110,30 +127,31 @@ def validMove(move):
     down = list(set(diagonalCheckDown) & set(distListValues))
     if down  != []:
       print 'Down diagonal occupied locations: ', down
-      return False
+      #return False
 
     up = list(set(diagonalCheckUp) & set(distListValues))
     if up  != []:
       print 'Up diagional occupied locations: ', up
-      return False
+      #return False
 
     down = list(set(vertCheckDown) & set(distListValues))
     if down  != []:
       print 'Down vertical occupied locations: ', down
-      return False
+      #return False
 
     up = list(set(vertCheckUp) & set(distListValues))
     if up  != []:
       print 'Up vertical occupied locations: ', up
-      return False
+      #return False
 
     f6_location = [61]
+
     if list(set(diagonalCheckUp) & set(f6_location)) != [] \
     or list(set(diagonalCheckDown) & set(f6_location)) != [] \
     or list(set(vertCheckUp) & set(f6_location)) != [] \
     or list(set(vertCheckDown) & set(f6_location)) != []:
         print 'You can not cross F6'
-        return False
+        #return False
     # Default assumption is that everything fits within a 11 x 11 grid
     return True
 
@@ -287,6 +305,6 @@ def drawBoard():
     return '\n' + strs
 
 print drawBoard(),\
-'\nInitial zobrist board: ', makeMove([['F', 1] , ['F', 7]], boardInit(board))
+'\nInitial zobrist board: ', makeMove([['F', 3] , ['F', 5]], boardInit(board))
 print drawBoard(), \
 '\nNew zobrist board: ', boardInit(board), boardInit(board) % 100
