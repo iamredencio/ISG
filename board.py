@@ -1,4 +1,4 @@
-import numpy as np
+#import numpy as np
 import random as rnd, math
 
 zobristKey = 1L; # Zobrist key of board position
@@ -8,14 +8,16 @@ evaluation = 0; # States if the side to move is ahead
 oldEntry = 1; # Entry in table that has been obtained on lower ply
 move = []; # The move that was best on a certain depth
 
-def HashInput(zobristKey, depth, flag, evaluation, oldEntry, move):
-    self.zobrist = zobrist;
+class HashInput:
+  def __init__(self, zobristKey, depth, flag, evaluation, oldEntry, move):
+    self.zobrist = zobristKey;
     self.depth = depth;
     self.flag = flag;
     self.eval = evaluation;
     self.oldEntry = oldEntry;
     self.move = move;
 
+h = HashInput(8547732456528787082, 3, 1, 23, 2, [['A', 6], ['A', 8]])
 
 # pieces = np.empty((3, 2, 120))
 
@@ -33,95 +35,7 @@ def HashInput(zobristKey, depth, flag, evaluation, oldEntry, move):
 
 #== if(hashentry.depth >= ply)
 #==  // Use the values attached
-#=====================================================
-class Node:
-  def __init__(self, data, parent = None):
-    self.data = list([data])
-    self.parent = parent
-    self.child = list()
 
-  def _isLeaf(self):
-    return len(self.child) == 0
-
-  # merge new_node subtree into self node
-  def _add(self, new_node):
-    for child in new_node.child:
-      child.parent = self
-    self.data.extend(new_node.child) # combine two lists
-
-
-  #find correct node to insert new node into tree
-  def _insert(self, new_node):
-
-    if self._isLeaf():
-      self._add(new_node)
-
-    elif new_node.data[0] > self.data[-1]:
-      self.childe[-1]._insert(new_node)
-    else:
-      for i in range(0, len(self.data)):
-        if new_node.data[0] < self.data[i]:
-          self.child[i]._insert(new_node)
-          break
-
-  def _find(self, item):
-
-    if item in self.data:
-      return item
-    elif self._isLeaf():
-      return False
-    elif item > self.data[-1]:
-      return self.child[-1]._find(item)
-    else:
-      for i in range(len(self.data)):
-        if item < self.data[i]:
-          return self.child[i]._find(item)
-
-  def _remove(self, item):
-      ''
-
-
-class Tree:
-  def __init__(self):
-      self.root = None
-
-  def insert(self, item):
-    if self.root is None:
-      self.root = Node(item)
-    else:
-      self.root._insert(Node(item)) # if it already exist create a node from item and then add to the root
-      while self.root.parent: #re-establish root to top of the tree
-        self.root = self.root.parent
-
-    return True
-
-    def remove(self, item):
-      return True
-
-    def find(self, item):
-      return self.root._find(item) #in node class
-
-
-'''
-System.out.println(miniMax(board, 5));
-
-private long miniMax(Board board, int depth)
-{
-  long nodes = 0;
-  if(depth == 0) return 1;
-  Vector moves = board.generateMoves();
-
-  for(int i = 0; i < moves.size(); i++)
-  {
-    board.makeMove((Move)moves.get(i));
-    nodes += miniMax(board, depth-1);
-    board.unmakeMove((Move)moves.get(i));
-  }
-
-  return nodes;
-}
-'''
-#=====================================================
 # Index + 1
 pieceList = {('F',1): [6, 'N', 14673753767654285510], ('F', 2):[17, 'M', 16429230233791572847], ('F', 3): [28, 'M', 5460759063079358787], ('E', 1): [5, 'P', 16318954180246517971], \
 ('E', 2): [16, 'P', 11953987020898008829], ('D', 2): [15, 'M', 13266023888163619881], ('G', 1): [7, 'P', 1156566135542422088], ('G', 2): [18, 'P', 15992721674334807719], ('H', 2): [19, 'M', 12746413846889731457], \
@@ -153,7 +67,7 @@ def validMove(move):
         distListValues.append(value[0])
 
     r, c = getRowCol(toMoveValue-1) # get values of to location
-    print distListValues
+
     try:
         if (c, r) in distListKeys: # Check if there is a piece at this location
           print 'Occupied', r, c
@@ -162,42 +76,64 @@ def validMove(move):
         print 'Vacant', r, c
         return False
 
-    # Check if the move is valid vertically
+    # Check if the move is valid vertically or diagonally
     vert = [11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121]
     leftUpRightDiag = [12, 13, 25, 26, 38, 39, 51, 52, 64, 65] #0 - 121
     rightUpLeftDiag = [10, 9, 19, 18, 28, 27, 37, 36, 46, 45] #121 - 0
 
     d = [] # direction
 
+    # Distance between from and to location
     distance = abs(fromMoveValue - toMoveValue)
 
     if distance in vert:
-      print 'Vertical', abs(fromMoveValue - toMoveValue)
+      print 'Vertical move', abs(fromMoveValue - toMoveValue), toMoveValue
       d = vert
      # return True
-
     elif distance-1 in leftUpRightDiag:
-      print 'Diagonal LeftUpRight', abs(fromMoveValue - toMoveValue)-1
+      print 'Diagonal LeftUpRight move', abs(fromMoveValue - toMoveValue)-1
       d = leftUpRightDiag
      # return True
-
     elif distance in rightUpLeftDiag:
-      print 'Diagonal rightUpLeft', abs(fromMoveValue - toMoveValue)
+      print 'Diagonal rightUpLeft move', abs(fromMoveValue - toMoveValue)
       d = rightUpLeftDiag
       #return True
+    else:
+      return False
 
-    # Check if there is another piece in the way
+    # Check if there is another piece in the between the from and to location
     diagonalCheckDown = [distance - v for v in d]
     diagonalCheckUp = [distance + v for v in d]
-    print diagonalCheckDown, distListValues, d, '==='
+    vertCheckUp = [fromMoveValue + v for v in d]
+    vertCheckDown = [fromMoveValue - v for v in d]
 
     down = list(set(diagonalCheckDown) & set(distListValues))
     if down  != []:
-      print down
+      print 'Down diagonal occupied locations: ', down
+      return False
 
     up = list(set(diagonalCheckUp) & set(distListValues))
     if up  != []:
-      print up
+      print 'Up diagional occupied locations: ', up
+      return False
+
+    down = list(set(vertCheckDown) & set(distListValues))
+    if down  != []:
+      print 'Down vertical occupied locations: ', down
+      return False
+
+    up = list(set(vertCheckUp) & set(distListValues))
+    if up  != []:
+      print 'Up vertical occupied locations: ', up
+      return False
+
+    f6_location = [61]
+    if list(set(diagonalCheckUp) & set(f6_location)) != [] \
+    or list(set(diagonalCheckDown) & set(f6_location)) != [] \
+    or list(set(vertCheckUp) & set(f6_location)) != [] \
+    or list(set(vertCheckDown) & set(f6_location)) != []:
+        print 'You can not cross F6'
+        return False
     # Default assumption is that everything fits within a 11 x 11 grid
     return True
 
@@ -351,6 +287,6 @@ def drawBoard():
     return '\n' + strs
 
 print drawBoard(),\
-'\nInitial zobrist board: ', makeMove([['F', 1] , ['K', 3]], boardInit(board))
+'\nInitial zobrist board: ', makeMove([['F', 1] , ['F', 7]], boardInit(board))
 print drawBoard(), \
 '\nNew zobrist board: ', boardInit(board), boardInit(board) % 100
