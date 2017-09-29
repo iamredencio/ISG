@@ -7,6 +7,9 @@ flag = 0; # exact, alhpa, beta, determines cut off
 evaluation = 0; # States if the side to move is ahead
 oldEntry = 1; # Entry in table that has been obtained on lower ply
 move = []; # The move that was best on a certain depth
+
+historyZobrist = 1 # store zobrist of from location
+side = 1 # 1 = black moves, 0 = white moves
 '''====
 >>> my_list1 = [30,34,56]
 >>> my_list2 = [29,500,43]
@@ -24,7 +27,92 @@ array([False,  True,  True], dtype=bool)
 1
 >>> ((A_2 >= 30).sum() == A_2.size).astype(np.int)
 0
+
+
+
+public int[] history;
+public int historyIndex;
+In the makeMove()-method:
+
+history[historyIndex] = 0;
+if(enPassant != -1)
+{
+  history[historyIndex] =
+  enPassant;
+}
+
+history[historyIndex] = history[historyIndex] |
+    (white_castle << 7)
+  | (black_castle << 9)
+  | (movesFifty << 16);
+
+historyIndex++;
+And in the unmakeMove()-method:
+
+historyIndex--;
+
+if(((history[historyIndex]) & 127) == 0)
+{
+  enPassant = -1;
+}
+else
+{
+  enPassant = ((history[historyIndex]) & 127);
+}
+white_castle = ((history[historyIndex] >> 7) & 3);
+black_castle = ((history[historyIndex] >> 9) & 3);
+movesFifty = ((history[historyIndex] >> 16) & 127);
 ==='''
+
+def allMoves():
+    return []
+
+#class algorithm():
+def miniMax(board, depth):
+    nodes = 0L
+
+    if depth == 0: return 1
+
+    moves = allMoves()
+
+    for move in moves:
+        makeMove(move, board)
+        nodes += miniMax(board, depth-1)
+        undoMove(move, board, historyZobrist)
+
+    return nodes
+
+def alphaBeta():
+    '''
+    1 private int alphaBeta(int ply, int alpha, int beta)
+2 {
+3 if(ply == 0)
+4 return positionEvaluation;
+5
+6 Vector legalMoves = generateMoves();
+7 for(int i = 0; i < legalMoves.size(); i++)
+8 {
+9 makeMove(legalMoves.get(i));
+10 eval = -alphaBeta(ply-1, -beta, -alpha);
+11 unmakeMove(legalMoves.get(i));
+12
+13 if(eval >= beta)
+14 return beta;
+15
+16 if(eval > alpha)
+17 alpha = eval;
+18 }
+19 return alpha;
+20 }
+    '''
+    return 0
+
+def negaMax():
+    return 0
+
+def monteCarlo():
+    return 0
+
 class HashInput:
   def __init__(self, zobristKey, depth, flag, evaluation, oldEntry, move):
     self.zobrist = zobristKey;
@@ -166,11 +254,26 @@ def makeMove(move, board):
     pieceList[(move[1][0], move[1][1])] = ['x', 'x', rnd.getrandbits(64)]
     pieceList[(move[1][0], move[1][1])][0] = pieceList[(move[0][0], move[0][1])][0]
     pieceList[(move[1][0], move[1][1])][1] = pieceList[(move[0][0], move[0][1])][1]
-
+    historyZobrist = pieceList[(move[0][0], move[0][1])][2]
     # Update Zobrist key board
     zobristKey ^= pieceList[(move[0][0], move[0][1])][2]
     zobristKey ^= pieceList[(move[1][0], move[1][1])][2]
     del pieceList[(move[0][0], move[0][1])]
+
+    return [zobristKey, historyZobrist]
+
+def undoMove(move, board, historyZobrist):
+
+    zobristKey = board
+
+    pieceList[(move[0][0], move[0][1])] = ['x', 'x', historyZobrist]
+    pieceList[(move[0][0], move[0][1])][0] = pieceList[(move[1][0], move[1][1])][0]
+    pieceList[(move[0][0], move[0][1])][1] = pieceList[(move[1][0], move[1][1])][1]
+
+    # Update Zobrist key board
+    zobristKey ^= pieceList[(move[0][0], move[0][1])][2]
+    zobristKey ^= pieceList[(move[1][0], move[1][1])][2]
+    del pieceList[(move[1][0], move[1][1])]
 
     return zobristKey
 
@@ -308,3 +411,4 @@ print drawBoard(),\
 '\nInitial zobrist board: ', makeMove([['F', 3] , ['F', 5]], boardInit(board))
 print drawBoard(), \
 '\nNew zobrist board: ', boardInit(board), boardInit(board) % 100
+#print 'miniMax', miniMax(board, 5)
