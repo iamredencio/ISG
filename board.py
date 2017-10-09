@@ -1,12 +1,12 @@
 #import numpy as np
 import random as rnd, math
 
-zobristKey = 1L; # Zobrist key of board position
-depth = 0; # the ply in which you perform the search
-flag = 0; # exact, alhpa, beta, determines cut off
-evaluation = 0; # States if the side to move is ahead
-oldEntry = 1; # Entry in table that has been obtained on lower ply
-move = []; # The move that was best on a certain depth
+zobristKey = 1 # Zobrist key of board position
+depth = 0 # the ply in which you perform the search
+flag = 0 # exact, alhpa, beta, determines cut off
+evaluation = 0 # States if the side to move is ahead
+oldEntry = 1 # Entry in table that has been obtained on lower ply
+move = [] # The move that was best on a certain depth
 
 historyZobrist = 1 # store zobrist of from location
 side = 1 # 1 = black moves, 0 = white moves
@@ -16,7 +16,7 @@ pieceList = {('F',1): [6, 'N', 14673753767654285510], ('F', 2):[17, 'M', 1642923
 ('F', 11): [116, 'n', 13507015793297805086], ('F', 10): [105, 'm', 7123177801226663513], ('F', 9): [94, 'm', 4759767732614604300], ('E', 10): [104, 'p', 14168245320891560355], ('E', 9): [93, 'p', 12553954530247672373], \
 ('D', 10): [103, 'm', 6690312555934356839], ('G', 10): [106, 'p', 1402378994127889916], ('G', 9): [95, 'p', 5817038718743648036], ('H', 10): [107, 'm', 15337642794495010922]}
 
-board = {1: -1, 2: -1, 3: -1, 4: -1, 5: 9547937974349114086L, 6: 991213505150526537L, 7: 10203940492185185489L, 8: -1, 9: -1, 10: -1, 11: -1, 12: -1, 13: -1, 14: 11075761370667082023L, 15: 11989401954775205416L, 16: 2261487428653572425L, 17: 14944548638720617981L, 18: 6799752729165931035L, 19: 8952607927009507782L, 20: 12196476491032764289L, 21: -1, 22: -1, 23: 1497723679229001448L, 24: 15308642353760843742L, 25: 4664971474448840787L, 26: 14198321289741883116L, 27: 1750136006425427714L, 28: 12717543261026594042L, 29: 1893867868887836679L, 30: 6423071005665915649L, 31: 17167822520268934647L, 32: 1033494776594851253L, 33: 12614810231349758038L, 34: 12812357701378153022L, 35: 6157652093163705960L, 36: 11346890750659902489L, 37: 6119074642154812525L, 38: 6035285078960495647L, 39: 18285913770784173976L, 40: 14598276339519438766L, 41: 13488043949835541439L, 42: 6555255413345703737L, 43: 3593535859385617564L, 44: 13271273125905254681L, 45: 8127741213294683337L, 46: 11430781601385271689L, 47: 9508616239193905430L, 48: 3053880333909433669L, 49: 6642592222032544942L, 50: 17820941620256416265L, 51: 15217551683737667953L, 52: 13011195941940098661L, 53: 17747644324528214990L, 54: 17807556656946595473L, 55: 3309486206342643222L, 56: 11959963355769459955L, 57: 11620436813669652349L, 58: 6233783362107545723L, 59: 18127665983867789043L, 60: 2488674194202034277L, 61: 10561804596974550131L, 62: 11540627113014027829L, 63: 18057537740823179037L, 64: 18208436570784193895L, 65: 14377704025794836245L, 66: 15035295000243831590L, 67: 3595584847695512963L, 68: 1282421462413134087L, 69: 10750882590667065227L, 70: 14001838571711505490L, 71: 10460507007269696930L, 72: 4909198791140644574L, 73: 4626005788343921385L, 74: 10226878675536017708L, 75: 1287410972230143095L, 76: 14073421603832371045L, 77: 14685808712592776252L, 78: 17330106233848931619L, 79: 3318933992577465589L, 80: 2953274606257949061L, 81: 5943497566932681161L, 82: 5976468406941437725L, 83: 4035097654001140978L, 84: 16981819976281240079L, 85: 18428843069456369071L, 86: 4710442358967623234L, 87: 15135802444542077879L, 88: 14845137964809650869L, 89: -1, 90: 12003907947608808087L, 91: 8663006492259260488L, 92: 11681184246980168227L, 93: 6846247378034281785L, 94: 10678015506979194509L, 95: 11254305699758063L, 96: 14407154827763356101L, 97: 17667765843890672275L, 98: 14721042491670706160L, 99: -1, 100: -1, 101: -1, 102: -1, 103: 2467995294121188610L, 104: 3854623131305135368L, 105: 11909760977978824779L, 106: 11846949674743113271L, 107: 1830922217091626208L, 108: -1, 109: -1, 110: -1, 111: -1, 112: -1, 113: -1, 114: -1, 115: -1, 116: 18005809339750231502L, 117: -1, 118: -1, 119: -1, 120: -1, 121:-1}
+board = {1: -1, 2: -1, 3: -1, 4: -1, 5: 9547937974349114086, 6: 991213505150526537, 7: 10203940492185185489, 8: -1, 9: -1, 10: -1, 11: -1, 12: -1, 13: -1, 14: 11075761370667082023, 15: 11989401954775205416, 16: 2261487428653572425, 17: 14944548638720617981, 18: 6799752729165931035, 19: 8952607927009507782, 20: 12196476491032764289, 21: -1, 22: -1, 23: 1497723679229001448, 24: 15308642353760843742, 25: 4664971474448840787, 26: 14198321289741883116, 27: 1750136006425427714, 28: 12717543261026594042, 29: 1893867868887836679, 30: 6423071005665915649, 31: 17167822520268934647, 32: 1033494776594851253, 33: 12614810231349758038, 34: 12812357701378153022, 35: 6157652093163705960, 36: 11346890750659902489, 37: 6119074642154812525, 38: 6035285078960495647, 39: 18285913770784173976, 40: 14598276339519438766, 41: 13488043949835541439, 42: 6555255413345703737, 43: 3593535859385617564, 44: 13271273125905254681, 45: 8127741213294683337, 46: 11430781601385271689, 47: 9508616239193905430, 48: 3053880333909433669, 49: 6642592222032544942, 50: 17820941620256416265, 51: 15217551683737667953, 52: 13011195941940098661, 53: 17747644324528214990, 54: 17807556656946595473, 55: 3309486206342643222, 56: 11959963355769459955, 57: 11620436813669652349, 58: 6233783362107545723, 59: 18127665983867789043, 60: 2488674194202034277, 61: 10561804596974550131, 62: 11540627113014027829, 63: 18057537740823179037, 64: 18208436570784193895, 65: 14377704025794836245, 66: 15035295000243831590, 67: 3595584847695512963, 68: 1282421462413134087, 69: 10750882590667065227, 70: 14001838571711505490, 71: 10460507007269696930, 72: 4909198791140644574, 73: 4626005788343921385, 74: 10226878675536017708, 75: 1287410972230143095, 76: 14073421603832371045, 77: 14685808712592776252, 78: 17330106233848931619, 79: 3318933992577465589, 80: 2953274606257949061, 81: 5943497566932681161, 82: 5976468406941437725, 83: 4035097654001140978, 84: 16981819976281240079, 85: 18428843069456369071, 86: 4710442358967623234, 87: 15135802444542077879, 88: 14845137964809650869, 89: -1, 90: 12003907947608808087, 91: 8663006492259260488, 92: 11681184246980168227, 93: 6846247378034281785, 94: 10678015506979194509, 95: 11254305699758063, 96: 14407154827763356101, 97: 17667765843890672275, 98: 14721042491670706160, 99: -1, 100: -1, 101: -1, 102: -1, 103: 2467995294121188610, 104: 3854623131305135368, 105: 11909760977978824779, 106: 11846949674743113271, 107: 1830922217091626208, 108: -1, 109: -1, 110: -1, 111: -1, 112: -1, 113: -1, 114: -1, 115: -1, 116: 18005809339750231502, 117: -1, 118: -1, 119: -1, 120: -1, 121:-1}
 
 '''====
 >>> my_list1 = [30,34,56]
@@ -38,43 +38,43 @@ array([False,  True,  True], dtype=bool)
 
 
 
-public int[] history;
-public int historyIndex;
+public int[] history
+public int historyIndex
 In the makeMove()-method:
 
-history[historyIndex] = 0;
+history[historyIndex] = 0
 if(enPassant != -1)
 {
   history[historyIndex] =
-  enPassant;
+  enPassant
 }
 
 history[historyIndex] = history[historyIndex] |
     (white_castle << 7)
   | (black_castle << 9)
-  | (movesFifty << 16);
+  | (movesFifty << 16)
 
-historyIndex++;
+historyIndex++
 And in the unmakeMove()-method:
 
-historyIndex--;
+historyIndex--
 
 if(((history[historyIndex]) & 127) == 0)
 {
-  enPassant = -1;
+  enPassant = -1
 }
 else
 {
-  enPassant = ((history[historyIndex]) & 127);
+  enPassant = ((history[historyIndex]) & 127)
 }
-white_castle = ((history[historyIndex] >> 7) & 3);
-black_castle = ((history[historyIndex] >> 9) & 3);
-movesFifty = ((history[historyIndex] >> 16) & 127);
+white_castle = ((history[historyIndex] >> 7) & 3)
+black_castle = ((history[historyIndex] >> 9) & 3)
+movesFifty = ((history[historyIndex] >> 16) & 127)
 ==='''
 
 #class algorithm():
 def miniMax(board, depth):
-    nodes = 0L
+    nodes = 0
 
     if depth == 0: return 1
 
@@ -92,22 +92,22 @@ def alphaBeta():
     1 private int alphaBeta(int ply, int alpha, int beta)
 2 {
 3 if(ply == 0)
-4 return positionEvaluation;
+4 return positionEvaluation
 5
-6 Vector legalMoves = generateMoves();
-7 for(int i = 0; i < legalMoves.size(); i++)
+6 Vector legalMoves = generateMoves()
+7 for(int i = 0 i < legalMoves.size() i++)
 8 {
-9 makeMove(legalMoves.get(i));
-10 eval = -alphaBeta(ply-1, -beta, -alpha);
-11 unmakeMove(legalMoves.get(i));
+9 makeMove(legalMoves.get(i))
+10 eval = -alphaBeta(ply-1, -beta, -alpha)
+11 unmakeMove(legalMoves.get(i))
 12
 13 if(eval >= beta)
-14 return beta;
+14 return beta
 15
 16 if(eval > alpha)
-17 alpha = eval;
+17 alpha = eva
 18 }
-19 return alpha;
+19 return alpha
 20 }
     '''
     return 0
@@ -120,12 +120,12 @@ def monteCarlo():
 
 class HashInput:
   def __init__(self, zobristKey, depth, flag, evaluation, oldEntry, move):
-    self.zobrist = zobristKey;
-    self.depth = depth;
-    self.flag = flag;
-    self.eval = evaluation;
-    self.oldEntry = oldEntry;
-    self.move = move;
+    self.zobrist = zobristKey
+    self.depth = depth
+    self.flag = flag
+    self.eval = evaluation
+    self.oldEntry = oldEntry
+    self.move = move
 
 h = HashInput(8547732456528787082, 3, 1, 23, 2, [['A', 6], ['A', 8]])
 
@@ -139,7 +139,7 @@ h = HashInput(8547732456528787082, 3, 1, 23, 2, [['A', 6], ['A', 8]])
  This means +100 means black is ahead if it is black to move when the \
  evaluation is made.'
 ### [zobrist key]%[total size of the hashtable]
-### int hashkey = (int)(zobrist%HASHSIZE);
+### int hashkey = (int)(zobrist%HASHSIZE)
 ### 6543248948113846523 % 1000 = 523
 ### So we store that position at index 523.
 
@@ -149,27 +149,25 @@ h = HashInput(8547732456528787082, 3, 1, 23, 2, [['A', 6], ['A', 8]])
 def allMoves(board):
     moves = []
     plyList = {}
-    for piecePos in pieceList:
-        ply = 0
-        for position in board:
-            ply += 1
-            r,c = getRowCol(position)
-            move = [[piecePos[0], piecePos[1]], [c, r]]
 
+    for piecePos in pieceList.items():
+        for position in board:
+            r,c = getRowCol(position-1) # index starts at 1
+            move = [[piecePos[0][0], piecePos[0][1]], [c, r]]
             #print 'Move', pieceList[piecePos][1], 'from', piecePos, 'to', c+str(r)
             if r != 99:
-                m = makeMove(move, zobristKey)
-                if m[2]:
+                #m = makeMove(move, zobristKey)
+                if validMove(move): # m[2]:
                     #print drawBoard()
                     moves += [move]
-                    undoMove(move, m[0], m[1])
+                    #undoMove(move, m[0], m[1])
 
-            if piecePos in plyList:
-                plyList[piecePos] += ply
-            else:
-                plyList[piecePos] = ply
-                
-    print 'Depth', plyList
+                    if piecePos[0] in plyList:
+                        plyList[piecePos[0]] += 1
+                    else:
+                        plyList[piecePos[0]] = 1
+
+    print ('possible moves', plyList)
     return moves
 
 
@@ -177,11 +175,17 @@ def allMoves(board):
 # is the starting position valid and is the to-position still on the board?
 def validMove(move):
     A = 65 #ascii value
+
     difHorz = ord(move[0][0]) - ord(move[1][0]) #horz distance - left,  + right
     difVert = move[0][1] - move[1][1] #vertical distance - up,  + down
     #Still on the 11 x 11 grid
     fromMoveValue = move[0][1] * 11 - (11 - (ord(move[0][0]) - A)) +1
     toMoveValue = move[1][1] * 11 - (11 - (ord(move[1][0]) - A)) +1
+
+
+    arrayDistance = toMoveValue - fromMoveValue
+    #check for non move
+    if arrayDistance == 0: return False
 
     if toMoveValue < 0 or toMoveValue > 121 or board[toMoveValue] == -1:
         return False
@@ -189,21 +193,19 @@ def validMove(move):
     if fromMoveValue < 0 or fromMoveValue > 121 or board[fromMoveValue] == -1:
         return False
 
+    #if toMoveValue % 11 != fromMoveValue:
+    #    return False
+
     #Create list of indexes
     distListKeys = []
     distListValues = []
-    for key, value in pieceList.iteritems():
+    for key, value in pieceList.items():
         distListKeys.append(key)
         distListValues.append(value[0])
 
     r, c = getRowCol(toMoveValue-1) # get values of to location
 
-    try:
-        if (c, r) in distListKeys: # Check if there is a piece at this location
-          #print 'Occupied', r, c
-          return False
-    except ValueError:
-        #print 'Vacant', r, c
+    if (c, r) in distListKeys: # Check if there is a piece at this location
         return False
 
     # Check if the move is valid vertically or diagonally
@@ -211,25 +213,56 @@ def validMove(move):
     leftUpRightDiag = [12, 13, 25, 26, 38, 39, 51, 52, 64, 65] #0 - 121
     rightUpLeftDiag = [10, 9, 19, 18, 28, 27, 37, 36, 46, 45] #121 - 0
 
-    d = [] # direction
 
+    c = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K']
+    n = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    #Distance to adjacent hexagon
+    rd= [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
+    rU= [0, 0, -1, 0, -1, 0, -1, 0, -1, 0, -1]
+    rv = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+
+
+    rowt, colt = getRowCol(toMoveValue-1)
+    rowf, colf = getRowCol(fromMoveValue-1)
+    endIndex = rowt
+    newValue = 0
+    for w in reversed(rd[rowf:rowt]):
+        newValue = w + rowt
+        if newValue < fromMoveValue:
+            break
+        if (c[endIndex], newValue) in distListKeys:
+            return False
+        endIndex -= 1
+
+    endIndex = rowt+1
+    for w in reversed(rU[rowf-1:rowt+1]):
+        newValue = w + rowt
+        if newValue < fromMoveValue:
+            break
+        if (c[endIndex], newValue) in distListKeys:
+            return False
+        endIndex -= 1
+
+    d = [] # direction
+    return True
+'''
     # Distance between from and to location
     distance = abs(fromMoveValue - toMoveValue)
 
     if distance in vert:
-      #print 'Vertical move', abs(fromMoveValue - toMoveValue), toMoveValue
-      d = vert
-     # return True
+        #print 'Vertical move', abs(fromMoveValue - toMoveValue), toMoveValue
+        d = vert
+        # return True
     elif distance-1 in leftUpRightDiag:
-      #print 'Diagonal LeftUpRight move', abs(fromMoveValue - toMoveValue)-1
-      d = leftUpRightDiag
-     # return True
+        #print 'Diagonal LeftUpRight move', abs(fromMoveValue - toMoveValue)-1
+        d = leftUpRightDiag
+        # return True
     elif distance in rightUpLeftDiag:
-      #print 'Diagonal rightUpLeft move', abs(fromMoveValue - toMoveValue)
-      d = rightUpLeftDiag
-      #return True
+        #print 'Diagonal rightUpLeft move', abs(fromMoveValue - toMoveValue)
+        d = rightUpLeftDiag
+        #return True
     else:
-      return False
+        return False
 
     # Check if there is another piece in the between the from and to location
     diagonalCheckDown = [distance - v for v in d]
@@ -237,25 +270,26 @@ def validMove(move):
     vertCheckUp = [fromMoveValue + v for v in d]
     vertCheckDown = [fromMoveValue - v for v in d]
     #if difVert < 0 or difHorz < 0:
+
     down = list(set(diagonalCheckDown) & set(distListValues))
-    if down  != []:''
-      #print 'Down diagonal occupied locations: ', down
-      #return False
+    if down  != []:
+    #print 'Down diagonal occupied locations: ', down
+        return False
 
     down = list(set(vertCheckDown) & set(distListValues))
-    if down  != []:''
-      #print 'Down vertical occupied locations: ', down
-      #return False
+    if down  != []:
+    #print 'Down vertical occupied locations: ', down
+        return False
 
     up = list(set(diagonalCheckUp) & set(distListValues))
-    if up  != []:''
-      #print 'Up diagional occupied locations: ', up
-      #return False
+    if up  != []:
+    #print 'Up diagional occupied locations: ', up
+        return False
 
     up = list(set(vertCheckUp) & set(distListValues))
-    if up  != []:''
-      #print 'Up vertical occupied locations: ', up
-      #return False
+    if up  != []:
+    #print 'Up vertical occupied locations: ', up
+        return False
 
     f6_location = [61]
 
@@ -263,10 +297,11 @@ def validMove(move):
     or list(set(diagonalCheckDown) & set(f6_location)) != [] \
     or list(set(vertCheckUp) & set(f6_location)) != [] \
     or list(set(vertCheckDown) & set(f6_location)) != []:
-        print 'You can not cross F6'
-        #return False
+        print ('You can not cross F6')
+        return False'''
     # Default assumption is that everything fits within a 11 x 11 grid
-    return True
+
+#   return True
 
 def makeMove(move, board):
 
@@ -290,7 +325,7 @@ def makeMove(move, board):
 def undoMove(move, board, historyZobrist):
 
     zobristKey = board
-    print move
+    print(move)
     pieceList[(move[0][0], move[0][1])] = ['x', 'x', historyZobrist]
     pieceList[(move[0][0], move[0][1])][0] = pieceList[(move[1][0], move[1][1])][0]
     pieceList[(move[0][0], move[0][1])][1] = pieceList[(move[1][0], move[1][1])][1]
@@ -306,7 +341,7 @@ def undoMove(move, board, historyZobrist):
 def boardInit(board):
     zobristKey = 0
     distList = []
-    for key, value in pieceList.iteritems():
+    for key, value in pieceList:
         distList.append(key)
 
     for pos in board:
