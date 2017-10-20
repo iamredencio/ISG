@@ -1,6 +1,21 @@
 import random as rnd
 import numpy as np
 
+
+# These are the vectors for moving from any hex to one of its neighbors.
+SE = np.array((1, 0, -1))
+SW = np.array((0, 1, -1))
+W = np.array((-1, 1, 0))
+NW = np.array((-1, 0, 1))
+NE = np.array((0, -1, 1))
+E = np.array((1, -1, 0))
+ALL_DIRECTIONS = np.array([NW, NE, E, SE, SW, W, ])
+cube_diagonals = np.array([
+   (+2, -1, -1), (+1, +1, -2), (-1, +2, -1), 
+   (-2, +1, +1), (-1, -1, +2), (+1, -2, +1)
+])
+DEPTH = 0
+
 def cube_to_axial(cube):
     q = cube[:, 0]
     r = cube[:, 2]
@@ -14,21 +29,6 @@ def axial_to_cube(hexchoord):
 
 def cube_distance(a, b):
     return max(abs(a[0] - b[0]), abs(a[1] - b[1]), abs(a[2] - b[2]))
-
-cube_diagonals = np.array([
-   (+2, -1, -1), (+1, +1, -2), (-1, +2, -1), 
-   (-2, +1, +1), (-1, -1, +2), (+1, -2, +1)
-])
-
-
-# These are the vectors for moving from any hex to one of its neighbors.
-SE = np.array((1, 0, -1))
-SW = np.array((0, 1, -1))
-W = np.array((-1, 1, 0))
-NW = np.array((-1, 0, 1))
-NE = np.array((0, -1, 1))
-E = np.array((1, -1, 0))
-ALL_DIRECTIONS = np.array([NW, NE, E, SE, SW, W, ])
 
 # cube board
 hexboard_map = {
@@ -206,38 +206,6 @@ print(attack([0,  4, -4], pieceList_map))
 def validPos(pos):
 	return sum(pos) == 0
 
-def allMoves(board):
-	moves = []
-	plyList = {}
-	for piecePos in pieceList:
-		plyList[piecePos] = 0
-		for position in board:
-			if not position in pieceList and board[position] != -1 and position != piecePos:
-				if validPos(position) and cube_distance(piecePos, position) == 0:
-					plyList[piecePos] += 1
-					moves += [piecePos, position]
-	print ('possible moves', plyList)
-	return moves
-
-def allMoves_map():
-	moves = []
-	plyList = {}
-	for piecePos in pieceList_map:
-		plyList[piecePos] = 0
-		for position in hexboard_map:
-			if not ( position in pieceList_map): # piece on location
-				if hexboard_map[position] != -1: # location valid, on board
-					if position != piecePos: # not the same location
-						if validPos(position):
-							plyList[piecePos] += 1
-							moves += [0, piecePos, position] # from initial position
-	print ('possible moves', plyList)
-	return moves
-
-
-#allMoves(board)
-#allMoves_map()
-
 def drawboard2():
 	draw = ''
 	nextline = 1 
@@ -267,25 +235,28 @@ def eval():
 	return 0
 
 def makeMove(move):
-	pieceList[move[1]] = pieceList[move[0]]
-	del pieceList[move[0]]
-	return 0
+	pieceList_map[move[1]] = pieceList_map[move[0]]
+	del pieceList_map[move[0]]
+	# return 0
 
 def unmakeMove(move):
-	pieceList[move[0]] = pieceList[move[1]]
-	del pieceList[move[1]]
-	return 0
+	pieceList_map[move[0]] = pieceList_map[move[1]]
+	del pieceList_map[move[1]]
+	# return 0
 
 # Check if a move is valid [[0, 0, 0], [0, -1, 1]]
 def validMove(move):
+	print(move)
 	# Move is not on the same line neither vertically, horizontally nor diagonally
-	if not( move[0][0] == move[1][0] or move[0][1] == move[1][1] or move[0][2] == move[2][2]):
-		print('off')
+	if not( move[0][0] == move[1][0] or move[0][1] == move[1][1] or move[0][2] == move[1][2]):
+		print('off track')
 		return False
 
 	# There is a piece on the to location and it is this your own team
-	elif move[1] in pieceList_map and pieceList_map[move[0]][1] == pieceList_map[move[1]][1]:
-		print('piece')
+	elif move[1] in pieceList_map and \
+	(pieceList_map[move[0]][1] in ['n', 'm', 'p'] \
+	or pieceList_map[move[0]][1] in ['N', 'M', 'P'] ):
+		print('own piece')
 		return False
 
 	# There is no piece on the from location and it is this your own team
@@ -299,7 +270,7 @@ def validMove(move):
 		return False
 
 	# F6 (0, 0, 0) is between the two locations
-	if move[0][0] == move[1][0] and move[1][0] == 0 and \
+	elif move[0][0] == move[1][0] and move[1][0] == 0 and \
 	0 in (range(move[0][1], move[1][1]) or range(move[1][1], move[0][1])) and \
 	0 in (range(move[0][2], move[1][2]) or range(move[1][2], move[0][2])): #up or down 
 		print('f6')
@@ -316,23 +287,13 @@ def validMove(move):
 		return False
 
 	# There is a piece between the to and from position
-	if move[0][0] == move[1][0] and move[0][1] > move[1][1]: #N S
-		print('Same direction up vertically')
-		return False
-	elif move[0][0] == move[1][0] and move[0][1] < move[1][1]:
-		print('Same direction diwn vertically')
-		return False
-	elif move[0][1] == move[1][1] and move[0][0] > move[1][0]: #OS WE
-		print('1Same direction right up to left down diagonally')
-		return False
-	elif move[0][1] == move[1][1] and move[0][0] < move[1][0]:
-		print('2Same direction left down to right up diagonally')
-		return False
-	elif move[0][2] == move[1][2] and move[0][0] < move[1][0]: #NE SW
-		print('3Same direction right up to left down diagonally')
-		return False
-	elif move[0][2] == move[1][2]and move[0][0] > move[1][0]:
-		print('4Same direction left down to right up diagonally')
+	if not ((move[0][0] == move[1][0] and move[0][1] > move[1][1]) \
+		or (move[0][0] == move[1][0] and move[0][1] < move[1][1]) \
+		or (move[0][1] == move[1][1] and move[0][0] > move[1][0]) \
+		or ( move[0][1] == move[1][1] and move[0][0] < move[1][0]) \
+		or (move[0][2] == move[1][2] and move[0][0] < move[1][0]) \
+		or (move[0][2] == move[1][2]and move[0][0] > move[1][0]) ):
+		print('Same direction')
 		return False
 
 	return True
@@ -378,49 +339,45 @@ def alphaBeta(depth, alpha, beta):
         return current
     
     
-#  Walk in a direction until you hit someone
-plyList = {}
-for piecePos in pieceList_map:
-	plyList[piecePos] = 0
-	clash = False
+def createAllMoves():
+	#  Walk in a direction until you hit someone
+	plyList = {}
+	moves = {}
+	for piecePos in pieceList_map:
+		plyList[piecePos] = 0
+		moves[(piecePos, DEPTH)] = []
+		clash = False
 
-	if piecePos == (0, -5, 5):
+		#if piecePos == (0, -5, 5):
 		for direction in range(len(ALL_DIRECTIONS)):
 			new = np.array(piecePos)
 
-			while True:
+			for j in range(-5, 5):
 
 				new += ALL_DIRECTIONS[direction]
-				#print("new: ", new, ALL_DIRECTIONS[direction], direction)
-				# if new in np.array(pieceList_map):
-				# 	break
-
-				if tuple(new + ALL_DIRECTIONS[direction]) == (0,0,0):
-					#print('through mid')
-					break
-
-				if tuple(new) in hexboard_map and hexboard_map[tuple(new)] == -1:
+				move = [piecePos, tuple(new)]
+				if tuple(new) in hexboard_map and hexboard_map[tuple(new)] == -1 \
+				or not tuple(new) in hexboard_map:
 					#print(' not accessible')
-					break
-
-
-				if tuple(new) in pieceList_map:
-					#print(' already busy', pieceList_map[tuple(new)])
 					break
 
 				if (new[0] or new[1] or new[2]) > 5 or (new[0] or new[1] or new[2]) < -5:
 					#print('Off grid')
 					break
 
-				if not validPos(tuple(new)):
+				if not validMove(move):
 					break
+
+				makeMove(move)
+				moves[(move[0], DEPTH)] += [move[1]]
+				unmakeMove(move)
 
 				plyList[piecePos] += 1
 
-					#print(piecePos, ' --> ', new)
+	for p in plyList:
+		print(p, plyList[p])
 
-
-print(plyList)
+	return moves
 
 #drawboard()
 '''
@@ -605,4 +562,57 @@ pieceList = {
 (1, 5) :  [ 1, 10195476464469860234 ] ,
 (2, 3) :  [-1, 12339900744325023683 ] ,
 }
+
+# There is a piece between the to and from position
+	if move[0][0] == move[1][0] and move[0][1] > move[1][1]: #N S
+		if 
+		print('Same direction up vertically')
+		return False
+	elif move[0][0] == move[1][0] and move[0][1] < move[1][1]:
+		print('Same direction diwn vertically')
+		return False
+	elif move[0][1] == move[1][1] and move[0][0] > move[1][0]: #OS WE
+		print('1Same direction right up to left down diagonally')
+		return False
+	elif move[0][1] == move[1][1] and move[0][0] < move[1][0]:
+		print('2Same direction left down to right up diagonally')
+		return False
+	elif move[0][2] == move[1][2] and move[0][0] < move[1][0]: #NE SW
+		print('3Same direction right up to left down diagonally')
+		return False
+	elif move[0][2] == move[1][2]and move[0][0] > move[1][0]:
+		print('4Same direction left down to right up diagonally')
+		return False
+
+		def allMoves(board):
+	moves = []
+	plyList = {}
+	for piecePos in pieceList:
+		plyList[piecePos] = 0
+		for position in board:
+			if not position in pieceList and board[position] != -1 and position != piecePos:
+				if validPos(position) and cube_distance(piecePos, position) == 0:
+					plyList[piecePos] += 1
+					moves += [piecePos, position]
+	print ('possible moves', plyList)
+	return moves
+
+def allMoves_map():
+	moves = []
+	plyList = {}
+	for piecePos in pieceList_map:
+		plyList[piecePos] = 0
+		for position in hexboard_map:
+			if not ( position in pieceList_map): # piece on location
+				if hexboard_map[position] != -1: # location valid, on board
+					if position != piecePos: # not the same location
+						if validPos(position):
+							plyList[piecePos] += 1
+							moves += [0, piecePos, position] # from initial position
+	print ('possible moves', plyList)
+	return moves
+
+
+#allMoves(board)
+#allMoves_map()
 '''
