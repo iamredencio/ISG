@@ -445,3 +445,6 @@ print drawBoard(), \
 zobristKey =  boardInit(board)
 #print 'miniMax', miniMax(board, 5)
 allMoves(board)
+for x in range(-5, 6):
+    for y in range(-5, 6):
+        print ((y, x), ': ', rnd.getrandbits(64), ',')
