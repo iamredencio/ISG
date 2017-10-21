@@ -189,14 +189,15 @@ pieceList_map = {
 }
 
 def hex2Cube(position):
-	x = ord(position[0]) - ord('A')-5
-	z = position[1]
-	#exchange rate, convert everything to scale between -5 and 5
-	if position[1] <= 6:
-		z -= 6
-	else:
-		z -= 5
-		
+	posV = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'].index(position[0])+1
+
+	x = posV - 6
+
+	# if position[1] <=  6:
+	# 	z = position[1] - 6
+	# else:
+	z = position[1] - (posV - 6)
+	print(x, z)
 	y = -x-z
 	return (x, y, z)
 # Check if the position is under attack give 1 point if there is no piece there and 5 if there is an opponents piece there
@@ -213,32 +214,10 @@ def attack(position, pieceList_map):
 print(attack([0,  4, -4], pieceList_map))
 
 def validPos(pos):
+	if ((pos[0] or pos[1] or pos[2]) > 5 or (pos[0] or pos[1] or pos[2]) < -5):
+		return False
+
 	return sum(pos) == 0
-
-def drawboard2():
-	draw = ''
-	nextline = 1 
-	for x in range(-6, 7):
-		for y in range(-6, 7):
-			if (x, y) in board:
-				if (x, y) in pieceList:
-					if pieceList[(x, y)][0] == -1:
-				 		draw += '-'
-					elif pieceList[(x, y)][0] == 1:
-					 	draw += '+'
-					else:
-						draw += '='
-				else:
-					draw += '_'
-			else:
-				draw += ' '
-
-			if nextline % 13 == 0:
-				draw += '\n'
-
-			nextline += 1
-
-	print(draw)
 
 def eval():
 	return 0
@@ -389,3 +368,119 @@ def createAllMoves():
 		print(p, plyList[p])
 	print('Total moves at depth: ', DEPTH, ': ', Total)
 	return moves
+
+# returns row and column based on position of hex board
+# translates hex position into array index
+def getRowCol(pos):
+
+    try:
+        row = [1, 12, 23, 34, 45, 56, 67, 78, 89, 100, 111].index(pos)+1
+        col = 'A'#ascii #65
+        return [row, col]
+    except ValueError:
+        pass
+
+    try:
+        row = [2, 13, 24, 35, 46, 57, 68, 79, 90, 101, 112].index(pos)+1
+        col = 'B' #66
+        return [row, col]
+    except ValueError:
+        pass
+
+    try:
+        row = [3, 14, 25, 36, 47, 58, 69, 80, 91, 102, 113].index(pos)+1
+        col = 'C' #67
+        return [row, col]
+    except ValueError:
+        pass
+
+    try:
+        row = [4, 15, 26, 37, 48, 59, 70, 81, 92, 103, 114].index(pos)+1
+        col = 'D' #68
+        return [row, col]
+    except ValueError:
+        pass
+
+    try:
+        row = [5, 16, 27, 38, 49, 60, 71, 82, 93, 104, 115].index(pos)+1
+        col = 'E' #69
+        return [row, col]
+    except ValueError:
+        pass
+
+    try:
+        row = [6, 17, 28, 39, 50, 61, 72, 83, 94, 105, 116].index(pos)+1
+        col = 'F' #70
+        return [row, col]
+    except ValueError:
+        pass
+
+    try:
+        row = [7, 18, 29, 40, 51, 62, 73, 84, 95, 106, 117].index(pos)+1
+        col = 'G' #71
+        return [row, col]
+    except ValueError:
+        pass
+
+    try:
+        row = [8, 19, 30, 41, 52, 63, 74, 85, 96, 107, 118].index(pos)+1
+        col = 'H' #72
+        return [row, col]
+    except ValueError:
+        pass
+
+    try:
+        row = [9, 20, 31, 42, 53, 64, 75, 86, 97, 108, 119].index(pos)+1
+        col = 'I' #73
+        return [row, col]
+    except ValueError:
+        pass
+
+    try:
+        row = [10, 21, 32, 43, 54, 65, 76, 87, 98, 109, 120].index(pos)+1
+        col = 'J' #74
+        return [row, col]
+    except ValueError:
+        pass
+
+    try:
+        # Row decides the value of the number for ex. f11: row = 11
+        row = [11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121].index(pos)+1
+        col = 'K' #75
+        return [row, col]
+    except ValueError:
+        pass
+
+    return [99, 'X'] # return invalid piece index, board position
+
+def drawBoard():
+	col = 'A'
+	row = 1
+	strs = '' # boardString, hex format
+
+	for pos in range(1, 121):
+
+		row, col = getRowCol(pos) #convert to [A, 1] format
+		x, y, z = hex2Cube([col, row])
+
+		if validPos((x, y, z)):
+			if (x, y, z) in pieceList_map:
+				print((col, row), (x, y, z))
+				if hexboard_map[(x, y, z)] != -1:
+				    strs += ' ' + str(pieceList_map[(x, y, z)][1])
+				elif hexboard_map[(x, y, z)] == -1:
+				    strs += ' '  #str(board[pos])
+			else:
+				if hexboard_map[(x, y, z)] != -1:
+				    strs += ' ' + '-'
+				elif hexboard_map[(x, y, z)] == -1:
+				    strs += '  ' #str(board[pos])
+
+			# Next line, use for creating a board
+			if pos > 0 and pos % 11 == 0:
+			    strs += '\n'
+			    if pos % 2 == 0:
+			        strs += ''
+
+
+	return '\n' + strs
