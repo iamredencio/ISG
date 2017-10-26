@@ -1,5 +1,6 @@
 import random as rnd
 import numpy as np
+from anytree import Node, RenderTree
 
 
 # These are the vectors for moving from any hex to one of its neighbors.
@@ -163,26 +164,51 @@ hexboard_map = {
 
 pieceList_map = {
 #b pieces
-(0, 5, -5): [0, 'N', 7039324259174552899], # (-5, 5, 0):
+(0, 5, -5): [0, 'N', 7039324259174552899],
 (-2, 5, -3): [-1, 'P', 2708738351447517863],
-(0, 4, -4): [-1, 'P', 14017614727057677400],
-(-1, 4, -3): [1, 'M', 17276587691014336917],
+(-1, 4, -3): [1, 'M', 17276587691014336917],#
 (0, 3, -3): [-1, 'P', 1811291666407332732],
-(1, 4, -5): [1, 'M', 13326266845422094801],
+(1, 4, -5): [1, 'M', 13326266845422094801],#
 (1, 3, -4): [1, 'M', 1809515583972370874],
 (-1, 5, -4): [1, 'M', 16240295312056102057],
 (2, 3, -5): [-1, 'P', 1571580890494471027],
+(0, 4, -4): [-1, 'P', 14017614727057677400],
 
 # w pieces
-(-2, -3, 5): [-1, 'm', 14917430532102944307], #(5, -3, -2):
-(-1, -4, 5): [1, 'n', 3843109819342283363],
-(0, -5, 5): [0, 'p', 10807404499587620088],
-(0, -4, 4): [-1, 'm', 688889229393588896],
-(0, -3, 3): [-1, 'm', 9592769839177490520],
+(-2, -3, 5): [-1, 'm', 14917430532102944307],
+(-1, -4, 5): [1, 'n', 3843109819342283363],#
+(0, -5, 5): [0, 'p', 10807404499587620088], #
+(0, -3, 3): [-1, 'm', 9592769839177490520],#
 (-1, -3, 4): [1, 'p', 5554593599456045088],
 (1, -5, 4): [1, 'p', 1938315421320155298],
 (1, -4, 3): [1, 'p', 10195476464469860234],
-(2, -5, 3): [-1, 'm', 12339900744325023683]
+(2, -5, 3): [-1, 'm', 12339900744325023683],
+(0, -4, 4): [-1, 'm', 688889229393588896]#
+}
+
+
+pieceList_mapCopy = {
+#b pieces
+(0, 5, -5): [0, 'N', 7039324259174552899],
+(-2, 5, -3): [-1, 'P', 2708738351447517863],
+(-1, 4, -3): [1, 'M', 17276587691014336917],#
+(0, 3, -3): [-1, 'P', 1811291666407332732],
+(1, 4, -5): [1, 'M', 13326266845422094801],#
+(1, 3, -4): [1, 'M', 1809515583972370874],
+(-1, 5, -4): [1, 'M', 16240295312056102057],
+(2, 3, -5): [-1, 'P', 1571580890494471027],
+(0, 4, -4): [-1, 'P', 14017614727057677400],
+
+# w pieces
+(-2, -3, 5): [-1, 'm', 14917430532102944307],
+(-1, -4, 5): [1, 'n', 3843109819342283363],#
+(0, -5, 5): [0, 'p', 10807404499587620088], #
+(0, -3, 3): [-1, 'm', 9592769839177490520],#
+(-1, -3, 4): [1, 'p', 5554593599456045088],
+(1, -5, 4): [1, 'p', 1938315421320155298],
+(1, -4, 3): [1, 'p', 10195476464469860234],
+(2, -5, 3): [-1, 'm', 12339900744325023683],
+(0, -4, 4): [-1, 'm', 688889229393588896]#
 }
 
 # returns row and column based on position of hex board
@@ -305,15 +331,17 @@ def hex2Cube(position):
 # Check if the position is under attack give 1 point if there is no piece there and 5 if there is an opponents piece there
 def attack(position, pieceList_map):
 	pieceList_map = np.array(list(pieceList_map))
+
 	if position[0] in pieceList_map[:, 0] \
 	and position[1] in pieceList_map[:, 1] \
 	and position[2] in pieceList_map[:, 2]:
-		return True
+		if sum(position) == 0:
+			return True
 
 	return False
 
 
-print(attack([0,  4, -4], pieceList_map))
+#print(attack([0,  4, -4], pieceList_map))
 
 def validPos(pos):
 	if ((pos[0] or pos[1] or pos[2]) > 5 or (pos[0] or pos[1] or pos[2]) < -5):
@@ -326,20 +354,21 @@ def eval():
 
 # # Move is valid [[0, 0, 0], [0, -1, 1]]
 def makeMove(move, board):
-
+	#print('make: ', move)
 	fromA = tuple(move[0])
 	toB = tuple(move[1])
 	zobristKey = board
 
-	pieceList_map[toB] = ['x', 'x', rnd.getrandbits(64)]
-	pieceList_map[toB][0] = pieceList_map[fromA][0]
-	pieceList_map[toB][1] = pieceList_map[fromA][1]
-	historyZobrist = pieceList_map[fromA][2]
-	# Update Zobrist key board
-	zobristKey ^= pieceList_map[fromA][2]
-	zobristKey ^= pieceList_map[toB][2]
-	del pieceList_map[fromA]
+	if not validMove(move):
+		return [zobristKey, '', False]
 
+	pieceList_mapCopy[toB] = [pieceList_mapCopy[fromA][0], pieceList_mapCopy[fromA][1], rnd.getrandbits(64)]
+	historyZobrist = pieceList_mapCopy[fromA][2]
+	# Update Zobrist key board
+	zobristKey ^= pieceList_mapCopy[fromA][2]
+	zobristKey ^= pieceList_mapCopy[toB][2]
+	del pieceList_mapCopy[fromA]
+	#print('made: ', move)
 	return [zobristKey, historyZobrist, True]
 
 def undoMove(move, board, historyZobrist):
@@ -347,69 +376,118 @@ def undoMove(move, board, historyZobrist):
 	fromA = tuple(move[0])
 	toB = tuple(move[1])
 	zobristKey = board
-	print('undo:', move)
-	pieceList_map[fromA] = ['x', 'x', historyZobrist]
-	pieceList_map[fromA][0] = pieceList_map[toB][0]
-	pieceList_map[fromA][1] = pieceList_map[toB][1]
+	#print('undo:', move)
+	pieceList_mapCopy[fromA] = [pieceList_mapCopy[toB][0], pieceList_mapCopy[toB][1], historyZobrist]
 
 	# Update Zobrist key board
-	zobristKey ^= pieceList_map[fromA][2]
-	zobristKey ^= pieceList_map[toB][2]
-	del pieceList_map[toB]
+	zobristKey ^= pieceList_mapCopy[fromA][2]
+	zobristKey ^= pieceList_mapCopy[toB][2]
+	del pieceList_mapCopy[toB]
 
 	return zobristKey
 
 # Check if a move is valid [[0, 0, 0], [0, -1, 1]]
 def validMove(move):
-	print(move)
+	#print('Valid move', move)
+	pieceList_map2 = np.array(list(pieceList_mapCopy))
 	# Move is not on the same line neither vertically, horizontally nor diagonally
 	if not( move[0][0] == move[1][0] or move[0][1] == move[1][1] or move[0][2] == move[1][2]):
-		#print('off track')
+		# print('off track')
+		return False
+
+		# There is no piece on the from location and it is this your own team
+	elif not move[0] in pieceList_mapCopy:
+		# print('no piece')
 		return False
 
 	# There is a piece on the to location and it is this your own team
-	elif move[1] in pieceList_map and \
-	(pieceList_map[move[0]][1] in ['n', 'm', 'p'] \
-	or pieceList_map[move[0]][1] in ['N', 'M', 'P'] ):
-		#print('own piece attacked')
-		return False
-
-	# There is no piece on the from location and it is this your own team
-	elif not move[0] in pieceList_map:
-		#print('no piece')
+	elif move[1] in pieceList_mapCopy and \
+	(pieceList_mapCopy[move[0]][1] in ['n', 'm', 'p'] \
+	or pieceList_mapCopy[move[0]][1] in ['N', 'M', 'P'] ):
+		# print('own piece attacked')
 		return False
 
 	# Starting location false coordinates
 	elif not (validPos(move[0]) or validPos(move[1])) :
-		#print('start or end is not on grid, false coords')
+		# print('start or end is not on grid, false coords')
 		return False
 
 	# F6 (0, 0, 0) is between the two locations
 	elif move[0][0] == move[1][0] and move[1][0] == 0 and \
 	0 in (range(move[0][1], move[1][1]) or range(move[1][1], move[0][1])) and \
 	0 in (range(move[0][2], move[1][2]) or range(move[1][2], move[0][2])): #up or down 
-		#print('f6')
+		#print('f61')
 		return False
 	elif 0 in (range(move[0][0], move[1][0]) or range(move[1][0], move[0][0])) and \
 	move[0][1] == move[1][1] and move[1][1] == 0 and \
 	0 in (range(move[0][2], move[1][2]) or range(move[1][2], move[0][2])): # up or down diagonal
-		#print('f6')
+		#print('f62')
 		return False
 	elif 0 in (range(move[0][0], move[1][0]) or range(move[1][0], move[0][0])) and \
 	0 in (range(move[0][1], move[1][1]) or range(move[1][1], move[0][1])) and \
 	move[0][2] == move[1][2] and move[1][2] == 0:
-		#print('f6')
+		#print('f63')
 		return False
 
 	# There is a piece between the to and from position
-	if not ((move[0][0] == move[1][0] and move[0][1] > move[1][1]) \
-		or (move[0][0] == move[1][0] and move[0][1] < move[1][1]) \
-		or (move[0][1] == move[1][1] and move[0][0] > move[1][0]) \
-		or ( move[0][1] == move[1][1] and move[0][0] < move[1][0]) \
-		or (move[0][2] == move[1][2] and move[0][0] < move[1][0]) \
-		or (move[0][2] == move[1][2]and move[0][0] > move[1][0]) ):
-		#print('Same direction')
+	elif not ((move[0][0] == move[1][0] and move[0][1] > move[1][1]) or (move[0][0] == move[1][0] and move[0][1] < move[1][1]) or (move[0][1] == move[1][1] and move[0][0] > move[1][0])  or ( move[0][1] == move[1][1] and move[0][0] < move[1][0])  or (move[0][2] == move[1][2] and move[0][0] < move[1][0])  or (move[0][2] == move[1][2]and move[0][0] > move[1][0]) ):
+		# print('Same direction')	
 		return False
+
+
+	# There is a piece between the to and from position
+	elif (move[0][0] == move[1][0] and move[0][1] > move[1][1]):
+		new = np.array(move[0])
+		for i in range(move[0][1] - move[1][1]):
+			new -= SW
+			new = tuple(new)
+			if new in list(pieceList_mapCopy):
+				return False
+
+	# There is a piece between the to and from position
+	elif (move[0][0] == move[1][0] and move[0][1] < move[1][1]):
+		new = np.array(move[0])
+		for i in range(move[1][1] - move[0][1]):
+			new += SW
+			new = tuple(new)
+			if new in list(pieceList_mapCopy):
+				return False
+
+	# There is a piece between the to and from position
+	elif (move[0][1] == move[1][1] and move[0][0] > move[1][0]):
+		new = np.array(move[0])
+		for i in range(move[0][0] - move[1][0]):
+			new += NW
+			new = tuple(new)
+			if new in list(pieceList_mapCopy):
+				return False
+
+	# There is a piece between the to and from position
+	elif (move[0][1] == move[1][1] and move[0][0] < move[1][0]):
+		new = np.array(move[0])
+		for i in range(move[1][0] - move[0][0]):
+			new -= NW
+			new = tuple(new)
+			if new in list(pieceList_mapCopy):
+				return False
+
+	# There is a piece between the to and from position
+	elif (move[0][2] == move[1][2] and move[0][1] > move[1][1]):
+		new = np.array(move[0])
+		for i in range(move[0][1] - move[1][1]):
+			new += E
+			new = tuple(new)
+			if new in list(pieceList_mapCopy):
+				return False
+
+	# There is a piece between the to and from position
+	elif (move[0][2] == move[1][2] and move[0][1] < move[1][1]):
+		new = np.array(move[0])
+		for i in range(move[1][1] - move[0][1]):
+			new -= E
+			new = tuple(new)
+			if new in list(pieceList_mapCopy):
+				return False
 
 	return True
 
@@ -432,17 +510,18 @@ def cube_distance(a, b):
 
 def miniMax(board, DEPTH):
 	nodes = 0
+	depth = DEPTH
+	if depth == 0: return 1 #root
 
-	if DEPTH == 0: return 1
+	moves = createAllMoves(depth)
 
-	moves = createAllMoves()
-
-	for piecePos in pieceList_map:
-		for move in moves[(0, piecePos)]:
-			move = list(move)
-			makeMove(move, board)
-			nodes += miniMax(board, DEPTH-1)
-			undoMove(move, board, historyZobrist)
+	for key, move in moves:
+		for m in move:
+			mov = [key[1], tuple(m)]
+			makeMove(mov, board)
+			nodes += miniMax(board, depth)
+			undoMove(mov, board, historyZobrist)
+		depth -= 1
 
 	return nodes
 
@@ -473,70 +552,70 @@ def alphaBeta(DEPTH, alpha, beta):
 
 #(10, (0, 3, -3)): [(-1, 3, -2), (-2, 3, -1), (-3, 3, 0), (-4, 3, 1), (-5, 3, 2), (0, 2, -2), (0, 1, -1), (0, 0, 0), (1, 2, -3), (2, 1, -3), (3, 0, -3), (4, -1, -3), (5, -2, -3)]
 def createAllMoves(depth):
-	for i in range(depth):
-		moves = createMoves(i)
 
-		print(moves)
-		break
+	moves = createMoves(i, pieceList_mapCopy)
+
+	for i in range(depth+1):
+
 		# Check for all the next moves
-		for piece in pieceList_map:
-			for move in moves[(i, piece)]:
-				temp, pieceList_map[move] = pieceList_map[piece], pieceList_map[piece]
-				del pieceList_map[piece]
-				createAllMoves(depth+1)
-			pieceList_map[piece] = temp
-			del pieceList_map[move]
+		for piece in pieceList_mapCopy:
+			if (i, piece) in moves:
+				for move in moves[(i, piece)]:
+					if validMove([piece, move]):
+						temp, pieceList_mapCopy[move] = pieceList_mapCopy[piece], pieceList_mapCopy[piece]
+						del pieceList_mapCopy[piece]
+						#print('hiero')
+						
+						moves.update(createMoves(i+1, pieceList_mapCopy)) # create moves for new position
+						pieceList_mapCopy[piece] = temp
+						del pieceList_mapCopy[move]
+	return moves
 
-def createMoves(depth):
+def createMoves(depth, pieceList):
 	#  Walk in a direction until you hit someone
+	pieces = pieceList
 	plyList = {}
 	moves = {}
 	Total = 0
 	zobristInit = boardInit()
-	#DEPTH = self.DEPTH
-	# moves[DEPTH] = []
 	DEPTH = depth
-	for piecePos in pieceList_map:
-		plyList[piecePos] = 0
-		moves[(DEPTH, piecePos)] = []
-		# startPiece = {piecePos : []}
+	moves[DEPTH] = []
+	piecesl = []
+	for piece in pieces:
+		#print(piece, 'printed')
+		plyList[piece] = 0
+		piecesl = [piece]
 		clash = False
 
-		#if piecePos == (0, -4, 4):
-		# 	print(piecePos, 'Hi')
-		# 	break
 		for direction in range(len(ALL_DIRECTIONS)):
-			new = np.array(piecePos)
-
-			for j in range(-6, 5):
+			new = np.array(piece)
+			
+			for j in range(-5, 5):
 
 				new += ALL_DIRECTIONS[direction]
-				move = [piecePos, tuple(new)]
+				move = [piece, tuple(new)]
+
 				if tuple(new) in hexboard_map and hexboard_map[tuple(new)] == -1 \
 				or not tuple(new) in hexboard_map:
-					print(' not accessible')
+					#print(' not accessible', move)
 					break
 
-				if (new[0] or new[1] or new[2]) > 5 or (new[0] or new[1] or new[2]) < -5:
-					print('Off grid')
-					break
-
-				if not validMove(move):
+				if (new[0] | new[1] | new[2]) > 5 or (new[0] | new[1] | new[2]) < -5:
+					#print('Off grid', move)
 					break
 
 				m = makeMove(move, zobristInit)
-				moves[(DEPTH, piecePos)] += [move[1]]
-				#moves[DEPTH] += [move[1]]
-				#startPiece[piecePos] += move[1]
-				if m[2] == True:
+				if m[2]:
+					piecesl += [move[1]]
 					undoMove(move, m[0], m[1])
 
-					plyList[piecePos] += 1
+					plyList[piece] += 1
 					Total += 1
-		# moves[DEPTH] += startPiece
+		moves[DEPTH] += [piecesl]
 
-	for p in plyList:
-		print(p, plyList[p])
+
+	# for p in plyList:
+	# 	print(p, plyList[p])
 	print('Total moves at DEPTH: ', DEPTH, ': ', Total)
 	return moves
 
@@ -579,8 +658,6 @@ def boardInit():
 	distList = []
 	for key, value in pieceList_map.items():
 		distList.append(key)
-
-	print(distList)
 
 	for pos in range(1, 121):
 		row, col = getRowCol(pos) #convert to [A, 1] format
