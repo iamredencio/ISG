@@ -1,0 +1,10 @@
+Cases hebben ref nummers, elke inkomende email wordt gematched aan parentid
+- Elke inkomende email met ref nummer gekoppeld aan bestaande parentid
+- Emails met ref nummer blijven parent id houde, ongeacht de tijd
+-- Cases hebben gemiddeld 30 dagen levensduur
+
+Datum geeft aan wanneer een email bij Salesforce is binnengekomen
+Het kan zijn dat het vanaf een andere afdeling is binnengekomen, hierdoor zie je meerdere emails in een thread some
+Vroegste datum is dus de eerste datum dat een email bij Salesforce is binnengekomen
+Vervolgens word er gekeken of er een ref nummer is.
+Zo ja, worden alle threads opgehaald
